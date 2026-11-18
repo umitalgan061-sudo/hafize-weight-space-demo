@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight-Space Harness Demo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a2e; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 2rem; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 2rem; }
+        h1 { font-size: 2.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
+        .subtitle { color: #4a5568; font-size: 1.1rem; }
+        .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.07); border: 1px solid #e2e8f0; }
+        .card h2 { font-size: 1.25rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; background: #3182ce; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+        .btn:hover { background: #2c5282; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(49,130,206,0.3); }
+        .btn:disabled { background: #a0aec0; cursor: not-allowed; transform: none; }
+        .btn.secondary { background: #48bb78; }
+        .btn.secondary:hover { background: #38a169; }
+        .btn.danger { background: #e53e3e; }
+        .btn.danger:hover { background: #c53030; }
+        .log { background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.875rem; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+        .log-line { margin: 0.25rem 0; }
+        .log-info { color: #63b3ed; }
+        .log-success { color: #68d391; }
+        .log-warning { color: #f6e05e; }
+        .log-error { color: #fc8181; }
+        .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background: #fefcbf; color: #b7791f; }
+        .status-approved { background: #c6f6d5; color: #276749; }
+        .status-rejected { background: #fed7d7; color: #c53030; }
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .module-card { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+        .module-card h3 { font-size: 0.95rem; color: #2d3748; margin-bottom: 0.5rem; }
+        .module-card p { font-size: 0.875rem; color: #718096; }
+        footer { text-align: center; margin-top: 2rem; color: #718096; font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Weight-Space Harness Demo</h1>
+            <p class="subtitle">Model ağırlıklarını güvenli, denetlenebilir şekilde düzenleme altyapısı</p>
+        </header>
+
+        <div class="card">
+            <h2>📦 Bileşenler</h2>
+            <div class="module-grid">
+                <div class="module-card">
+                    <h3>1. Tensor Sandbox</h3>
+                    <p>Forward-pass budget ile güvenli tensor okuma/yazma (torch, safetensors)</p>
+                </div>
+                <div class="module-card">
+                    <h3>2. Eval Harness</h3>
+                    <p>MATH-500, GSM8K, IFEval benchmark'leri + regression suite</p>
+                </div>
+                <div class="module-card">
+                    <h3>3. Reviewer Agent</h3>
+                    <p>Bağımsız ikinci ajan: doğruluk, regresyon, güvenlik kontrolü</p>
+                </div>
+                <div class="module-card">
+                    <h3>4. Human Gate</h3>
+                    <p>Diff özeti + onay akışı (insan-in-the-loop)</p>
+                </div>
+                <div class="module-card">
+                    <h3>5. Audit Trail</h3>
+                    <p>Her pass, araç çağrısı, tetikleyici loglanır</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>▶️ Canlı Demo</h2>
+            <p>Butonlar mock simülasyon çalıştırır (gerçek model ağırlığı erişimi yok):</p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                <button class="btn" onclick="runDemo('sandbox')">Tensor Sandbox</button>
+                <button class="btn secondary" onclick="runDemo('eval')">Eval Harness</button>
+                <button class="btn" onclick="runDemo('reviewer')">Reviewer Agent</button>
+                <button class="btn secondary" onclick="runDemo('gate')">Human Gate</button>
+                <button class="btn danger" onclick="runDemo('audit')">Audit Trail</button>
+            </div>
+            <div id="log" class="log" style="margin-top: 1rem; display: none;"></div>
+        </div>
+
+        <footer>
+            Demo için mock veri kullanır. Gerçek entegrasyon: read_tensors/write_tensors/run_forward/run_eval API'si gerekir.
+        </footer>
+    </div>
+
+    <script>
+        async function runDemo(module) {
+            const logEl = document.getElementById('log');
+            logEl.style.display = 'block';
+            logEl.textContent = '';
+            const steps = {
+                sandbox: ['Initializing tensor sandbox...', 'Loading model weights (mock)...', 'Forward pass #1/5 ✓', 'Forward pass #2/5 ✓', 'Forward pass #3/5 ✓', 'Forward pass #4/5 ✓', 'Forward pass #5/5 ✓', 'Budget check: 5/5 passes used ✓', 'Tensor sandbox simulation complete.'],
+                eval: ['Loading MATH-500 subset...', 'Running GSM8K...', 'Running IFEval...', 'Regression suite: 0 failures', 'Eval harness simulation complete.'],
+                reviewer: ['Reviewer agent initialized...', 'Checking accuracy delta...', 'Checking regression...', 'Checking safety constraints...', 'Reviewer verdict: APPROVED ✓', 'Reviewer simulation complete.'],
+                gate: ['Generating diff summary...', 'Changed tensors: 3 layers', 'Accuracy delta: +0.2%', 'Regression: none', 'Awaiting human approval...', 'Human gate simulation complete.'],
+                audit: ['Fetching audit trail...', 'Pass 1: sandbox - 5 forwards', 'Pass 2: eval - 3 suites', 'Pass 3: reviewer - approved', 'Pass 4: gate - approved', 'Audit trail simulation complete.']
+            };
+            for (const line of steps[module]) {
+                await new Promise(r => setTimeout(r, 400));
+                logEl.textContent += line + '\n';
+                logEl.scrollTop = logEl.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
