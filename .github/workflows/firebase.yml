@@ -1,48 +1,44 @@
 name: Deploy to Firebase
-
-
-
-
 on:
   push:
     branches: [main]
+    paths: ['site-b/**', '.github/workflows/firebase.yml']
   workflow_dispatch:
-
-
-
-
 permissions:
   contents: read
-
-
-
-
+concurrency:
+  group: weight-space06-production
+  cancel-in-progress: false
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-
-
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '24'
-
-
-
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-
-
-
-      - name: Configure Firebase credentials
+      - run: npm install --global firebase-tools@14
+      - name: Deploy Weight-Space
         env:
-          FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD }}
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD }}
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        shell: bash
         run: |
+          set -eu
+          if [[ -n "$SERVICE_ACCOUNT" ]]; then
+            umask 077
+            export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-deploy.json"
+            trap 'rm -f "$GOOGLE_APPLICATION_CREDENTIALS"' EXIT
+            printf '%s' "$SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
+            unset FIREBASE_TOKEN
+          elif [[ -z "$FIREBASE_TOKEN" ]]; then
+            echo "::error::Firebase Hosting credential is missing from repository secrets."
+            exit 1
+          fi
+          firebase deploy --project projelerim-8fecd --only hosting:weight-space06 --non-interactive
+      - name: Verify published laboratory bytes
+        run: |
+          for file in index.html lab.html lab.js lab.css; do
+            curl --fail --silent --show-error --retry 3 "https://weight-space06.web.app/$file?release=$GITHUB_SHA" -o "$RUNNER_TEMP/served"
+            cmp "site-b/$file" "$RUNNER_TEMP/served"
+          done
