@@ -55,3 +55,39 @@ el('export').onclick = () => {
   const url = URL.createObjectURL(new Blob([JSON.stringify({model:'linear-2d-v1',train,holdout,audit},null,2)],{type:'application/json'}));
   const a=document.createElement('a'); a.href=url; a.download='hafize-deney.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
+const ranking = el('ranking');
+function clearDerivedResults() {
+  ranking.replaceChildren();
+  el('prediction').textContent = '';
+}
+el('experiment').addEventListener('input', clearDerivedResults);
+el('apply').addEventListener('click', clearDerivedResults);
+el('undo').addEventListener('click', clearDerivedResults);
+el('compare').onclick = () => {
+  if (!el('epochs').reportValidity()) return;
+  const epochs = el('epochs').valueAsNumber;
+  const trials = [0.01,0.05,0.1,0.2,0.5].map(rate => ({
+    rate, error: loss(fit(current,rate,epochs),holdout)
+  })).sort((a,b) => a.error - b.error);
+  ranking.replaceChildren();
+  for (const trial of trials) {
+    const row = document.createElement('li');
+    row.textContent = 'Hız '+trial.rate+' · Hata '+trial.error.toPrecision(6)+' ';
+    const select = document.createElement('button');
+    select.type = 'button';
+    select.textContent = 'Bu adayla dene';
+    select.onclick = () => {
+      el('rate').value = trial.rate;
+      el('experiment').requestSubmit();
+    };
+    row.append(select); ranking.append(row);
+  }
+};
+el('predict').onsubmit = event => {
+  event.preventDefault();
+  const row = [el('x1').valueAsNumber,el('x2').valueAsNumber];
+  const expected = label(row), actual = predict(current,row);
+  el('prediction').textContent = Number.isFinite(actual) && Number.isFinite(expected)
+    ? 'Tahmin: '+actual.toPrecision(6)+' · Hedef: '+expected.toPrecision(6)+' · Mutlak hata: '+Math.abs(actual-expected).toPrecision(6)
+    : 'Daha küçük sayılarla tekrar dene.';
+};
