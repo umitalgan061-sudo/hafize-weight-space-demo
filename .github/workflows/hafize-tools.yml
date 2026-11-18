@@ -1,0 +1,51 @@
+name: Publish Hafize frontend tools
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/hafize-tools.yml', 'ops/publish-hafize-tools.cjs']
+permissions:
+  contents: read
+concurrency:
+  group: hafize-ua-production
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: umitalgan061-sudo/hafize
+          ref: 3befafff896adc68a8052a192447e5b813def8c7
+          path: hafize
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Build standalone frontend tools
+        run: |
+          set -eu
+          cd hafize
+          npm ci --no-audit --no-fund
+          mkdir -p ../assets/typed-build
+          ./node_modules/.bin/esbuild public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build
+          cp public/task-plan.html public/studio.html public/studio.css ../assets/
+      - run: npm install --global firebase-tools@14
+      - name: Publish and verify live site
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          set -eu
+          if [[ -n "$SERVICE_ACCOUNT" ]]; then
+            umask 077
+            export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-deploy.json"
+            trap 'rm -f "$GOOGLE_APPLICATION_CREDENTIALS"' EXIT
+            printf '%s' "$SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
+            unset FIREBASE_TOKEN
+          fi
+          export NODE_PATH="$(npm root --global)"
+          node ops/publish-hafize-tools.cjs
