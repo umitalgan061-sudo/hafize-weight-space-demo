@@ -25,19 +25,19 @@ jobs:
 
       - name: Configure Firebase credentials
         env:
-          FIREBASE_SERVICE_ACCOUNT_HAFIZE_23465: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_HAFIZE_23465 }}
+          FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD }}
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -n "$FIREBASE_SERVICE_ACCOUNT_HAFIZE_23465" ]; then
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD" ]; then
             credential_file="$RUNNER_TEMP/firebase-service-account.json"
-            printf '%s' "$FIREBASE_SERVICE_ACCOUNT_HAFIZE_23465" > "$credential_file"
+            printf '%s' "$FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD" > "$credential_file"
             echo "GOOGLE_APPLICATION_CREDENTIALS=$credential_file" >> "$GITHUB_ENV"
             echo "Using Firebase service-account credentials."
           elif [ -n "$FIREBASE_TOKEN" ]; then
-            echo "::warning::Using legacy FIREBASE_TOKEN. Prefer FIREBASE_SERVICE_ACCOUNT_HAFIZE_23465."
+            echo "::warning::Using legacy FIREBASE_TOKEN. Prefer FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD."
           else
-            echo "::error::No Firebase credential is configured. Add FIREBASE_SERVICE_ACCOUNT_HAFIZE_23465 (recommended) or FIREBASE_TOKEN before retrying."
+            echo "::error::No Firebase credential is configured. Add FIREBASE_SERVICE_ACCOUNT_PROJELERIM_8FECD (recommended) or FIREBASE_TOKEN before retrying."
             exit 1
           fi
 
@@ -46,7 +46,7 @@ jobs:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           set -euo pipefail
-          firebase deploy --project=hafize-23465 --only=hosting --non-interactive --debug 2>&1 | tee /tmp/firebase-deploy.log
+          firebase deploy --project=projelerim-8fecd --only=hosting --non-interactive --debug 2>&1 | tee /tmp/firebase-deploy.log
 
       - name: Verify live Hosting sites
         run: |
