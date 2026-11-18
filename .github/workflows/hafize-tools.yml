@@ -29,9 +29,8 @@ jobs:
         run: |
           set -eu
           cd hafize
-          npm ci --no-audit --no-fund
           mkdir -p ../assets/typed-build
-          ./node_modules/.bin/esbuild public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build
+          npm exec --yes --package=esbuild@0.25.12 -- esbuild public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build
           cp public/task-plan.html public/studio.html public/studio.css ../assets/
       - run: npm install --global firebase-tools@14
       - name: Publish and verify live site
