@@ -1,67 +1,229 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hafize Weight-Space Harness Demo</title>
-<style>
-:root { --bg:#0b0d12; --fg:#e8eaf0; --muted:#6b7280; --acc:#22d3ee; --acc2:#a855f7; --card:#11141a; --border:#1f2430; }
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;flex-direction:column}
-header{padding:2rem 1.5rem;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(34,211,238,.08),transparent)}
-h1{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--muted);margin-top:.5rem;font-size:.95rem}
-main{flex:1;padding:1.5rem;max-width:960px;margin:0 auto;width:100%}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-top:1.5rem}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;transition:transform .15s,border-color .15s}
-.card:hover{transform:translateY(-2px);border-color:var(--acc)}
-.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
-.card h3::before{content:"";width:8px;height:8px;background:var(--acc);border-radius:2px}
-.card p{color:var(--muted);font-size:.9rem;line-height:1.5}
-.code{background:#06080c;border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:ui-monospace,monospace;font-size:.8rem;overflow:auto;max-height:300px;margin-top:1rem;white-space:pre}
-.badge{display:inline-block;font-size:.65rem;padding:.15rem .5rem;border-radius:999px;background:rgba(34,211,238,.15);color:var(--acc);margin-left:.5rem}
-footer{padding:1.5rem;text-align:center;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border)}
-a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight-Space Harness Demo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a2e; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 2rem; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 2rem; }
+        h1 { font-size: 2.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.5rem; }
+        .subtitle { color: #4a5568; font-size: 1.1rem; }
+        .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.07); border: 1px solid #e2e8f0; }
+        .card h2 { font-size: 1.25rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; background: #3182ce; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+        .btn:hover { background: #2c5282; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(49,130,206,0.3); }
+        .btn:disabled { background: #a0aec0; cursor: not-allowed; transform: none; }
+        .btn.secondary { background: #48bb78; }
+        .btn.secondary:hover { background: #38a169; }
+        .btn.danger { background: #e53e3e; }
+        .btn.danger:hover { background: #c53030; }
+        .log { background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.875rem; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+        .log-line { margin: 0.25rem 0; }
+        .log-info { color: #63b3ed; }
+        .log-success { color: #68d391; }
+        .log-warning { color: #f6e05e; }
+        .log-error { color: #fc8181; }
+        .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background: #fefcbf; color: #b7791f; }
+        .status-approved { background: #c6f6d5; color: #276749; }
+        .status-rejected { background: #fed7d7; color: #c53030; }
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .module-card { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+        .module-card h3 { font-size: 0.95rem; color: #2d3748; margin-bottom: 0.5rem; }
+        .module-card p { font-size: 0.875rem; color: #718096; }
+        footer { text-align: center; margin-top: 2rem; color: #718096; font-size: 0.875rem; }
+    </style>
 </head>
 <body>
-<header>
-<h1>Weight-Space Harness <span class="badge">Demo</span></h1>
-<p class="sub">LLM ajanı kendi ağırlıklarını güvenli sandbox'ta düzenlemek için gereken 5 bileşen</p>
-</header>
-<main>
-<div class="grid">
-<div class="card"><h3>1. Tensor Erişim Katmanı</h3><p>Safetensors checkpoint'ten katman bazında tensor okuma/yazma (read_tensors, write_tensors). Şifreli, imzalı delta üretimi.</p></div>
-<div class="card"><h3>2. Forward-Pass Sandbox</h3><p>Budgetlu (max N pass) inference ortamı. run_forward(input, budget) → logits + activation cache. CPU/GPU seçimi.</p></div>
-<div class="card"><h3>3. Eval Harness</h3><p>Standart benchmark paketi: MATH-500, GSM8K, IFEval, BBH. Otomatik skorlama + regresyon tespiti (pre/post diff).</p></div>
-<div class="card"><h3>4. Reviewer Ajanı</h3><p>Düzenlemeyi yapan ajandan bağımsız ikinci ajan: güvenlik, doğruluk, görev uyumu, yan etki analizi. JSON raporu.</p></div>
-<div class="card"><h3>5. İnsan Onay Kapısı</h3><p>Değişen tensor listesi, öncesi/sonrası skor tablosu,Reviewer raporu → tek tıkla onay/red. Audit log (kim, ne zaman, hangi delta).</p></div>
-<div class="card"><h3>Mock Demo (Çalışır)</h3><p>Aşağıdaki butonla mock tensörler üzerinde bir düzenleme simülasyonu çalıştırın. Gerçek ağırlıklara erişim yok; altyapı hazır.</p><button id="runDemo" style="margin-top:.75rem;padding:.5rem 1rem;background:var(--acc);color:#000;border:none;border-radius:6px;font-weight:600;cursor:pointer">Demo Çalıştır</button><pre id="demoOut" class="code" style="display:none"></pre></div>
-</div>
-</main>
-<footer>
-Kod: <a href="https://github.com/umitalgan061-sudo/hafize-weight-space-demo" target="_blank">github.com/umitalgan061-sudo/hafize-weight-space-demo</a> • Hafize weight-space harness altyapı demonstrasyonu
-</footer>
-<script>
-document.getElementById('runDemo').onclick = async () => {
-  const out = document.getElementById('demoOut');
-  out.style.display = 'block';
-  out.textContent = '>>> Sandbox başlatılıyor...\n';
-  await new Promise(r=>setTimeout(r,300));
-  out.textContent += '>>> Mock checkpoint yüklendi: 32 layer, 4096 dim, 128 head\n';
-  await new Promise(r=>setTimeout(r,300));
-  out.textContent += '>>> Tensor okuma: layer.15.mlp.down_proj.weight (4096, 11008)\n';
-  await new Promise(r=>setTimeout(r,200));
-  out.textContent += '>>> Hipotez: Bu tensor "koşul yapılarını" kodluyor → LoRA-rank-8 delta uygulanıyor\n';
-  await new Promise(r=>setTimeout(r,300));
-  out.textContent += '>>> Forward-pass (budget=3): pre-loss=2.31 → post-loss=2.18\n';
-  await new Promise(r=>setTimeout(r,300));
-  out.textContent += '>>> Eval harness: MATH 42.1% → 44.3% (+2.2pp), GSM8K 78.4% → 79.1%\n';
-  await new Promise(r=>setTimeout(r,200));
-  out.textContent += '>>> Reviewer: "Güvenli, görev uyumu yüksek, regresyon yok" ✅\n';
-  await new Promise(r=>setTimeout(r,200));
-  out.textContent += '>>> İnsan onay kapısı: Diff + rapor hazır → Onayla/Red et\n';
-  out.textContent += '\n✅ Simülasyon tamam. Gerçek API için: read_tensors(), write_tensors(), run_forward(), run_eval()';
-};
-</script>
+    <div class="container">
+        <header>
+            <h1>⚙️ Weight-Space Harness</h1>
+            <p class="subtitle">Model ağırlıklarını güvenli sandbox'ta düzenleme, değerlendirme ve onay altyapısı</p>
+        </header>
+
+        <div class="card">
+            <h2>📦 Core Modules</h2>
+            <div class="module-grid">
+                <div class="module-card">
+                    <h3>sandbox.py</h3>
+                    <p>Tensor okuma/yazma, forward-pass bütçesi, checkpoint diff, safetensors I/O</p>
+                </div>
+                <div class="module-card">
+                    <h3>eval_harness.py</h3>
+                    <p>MATH-500, GSM8K, IFEval, Regression benchmarks</p>
+                </div>
+                <div class="module-card">
+                    <h3>reviewer_agent.py</h3>
+                    <p>Bağımsız doğrulama: regresyon, risk, istikrar analizi</p>
+                </div>
+                <div class="module-card">
+                    <h3>human_gate.py</h3>
+                    <p>İnsan onay kapısı: diff özeti, eval karşılaştırması, karar kaydı</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🚀 Demo Simulation</h2>
+            <p style="margin-bottom: 1rem; color: #4a5568;">Aşağıdaki butonlar mock bir düzenleme akışını simüle eder. Gerçek entegrasyon için model sağlayıcısından <code>read_tensors</code>, <code>write_tensors</code>, <code>run_forward</code>, <code>run_eval</code> API'leri gerekir.</p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <button class="btn" id="btn-sandbox" onclick="runDemo('sandbox')">Sandbox: Tensor Read/Write</button>
+                <button class="btn secondary" id="btn-eval" onclick="runDemo('eval')">Eval: Full Benchmark Suite</button>
+                <button class="btn" id="btn-review" onclick="runDemo('review')">Reviewer: Risk Analysis</button>
+                <button class="btn secondary" id="btn-gate" onclick="runDemo('gate')">Human Gate: Approval Flow</button>
+                <button class="btn danger" id="btn-full" onclick="runDemo('full')">Full Pipeline</button>
+            </div>
+            <div id="log" class="log" style="display: none;"></div>
+        </div>
+
+        <div class="card">
+            <h2>📋 Architecture</h2>
+            <pre style="background: #f7fafc; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.8rem;"><code>┌─────────────────────────────────────────────────────────────┐
+│                    WEIGHT-SPACE HARNESS                      │
+├─────────────────────────────────────────────────────────────┤
+│  1. PROPOSAL GENERATION                                      │
+│     Agent hypothesizes tensor edits → sandbox.write_tensor() │
+├─────────────────────────────────────────────────────────────┤
+│  2. SANDBOX VALIDATION                                       │
+│     budget.forward_pass() → eval_harness.run_full_suite()    │
+├─────────────────────────────────────────────────────────────┤
+│  3. INDEPENDENT REVIEW                                       │
+│     reviewer_agent.review() → risk assessment                │
+├─────────────────────────────────────────────────────────────┤
+│  4. HUMAN GATE                                               │
+│     human_gate.create_request() → human decides              │
+├─────────────────────────────────────────────────────────────┤
+│  5. DEPLOYMENT                                               │
+│     checkpoint.save() → production rollout                   │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+        </div>
+
+        <footer>
+            <p>Demo only — real weight edits require model provider API access</p>
+        </footer>
+    </div>
+
+    <script>
+        function addLog(msg, type = 'info') {
+            const log = document.getElementById('log');
+            log.style.display = 'block';
+            const line = document.createElement('div');
+            line.className = `log-line log-${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        async function runDemo(stage) {
+            const log = document.getElementById('log');
+            log.innerHTML = '';
+            log.style.display = 'block';
+            
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(b => b.disabled = true);
+            
+            try {
+                if (stage === 'sandbox' || stage === 'full') {
+                    addLog('🔧 SANDBOX: Initializing WeightSpaceSandbox...', 'info');
+                    await sleep(300);
+                    addLog('   Loading checkpoint (mock: safetensors)...', 'info');
+                    await sleep(200);
+                    addLog('   ✓ 124M tensors loaded (transformer layers 0-31)', 'success');
+                    addLog('   Reading tensor: model.layers.15.attn.q_proj.weight', 'info');
+                    await sleep(150);
+                    addLog('   ✓ Shape: [4096, 4096], dtype: float16, hash: a3f2...', 'success');
+                    addLog('   Writing tensor: model.layers.15.attn.q_proj.weight (Δ rank-1 update)', 'info');
+                    await sleep(200);
+                    addLog('   ✓ Diff: old_hash=a3f2... new_hash=7b9c... CHANGED', 'success');
+                    addLog('   Forward budget: 5/100 passes used', 'info');
+                    addLog('   ✓ Sandbox validation complete', 'success');
+                }
+                
+                if (stage === 'eval' || stage === 'full') {
+                    addLog('\n📊 EVAL HARNESS: Running benchmark suite...', 'info');
+                    await sleep(200);
+                    addLog('   MATH-500: 500 problems...', 'info');
+                    await sleep(400);
+                    addLog('   ✓ Score: 0.847 (threshold 0.80) ✅ PASSED', 'success');
+                    addLog('   GSM8K: 1319 problems...', 'info');
+                    await sleep(400);
+                    addLog('   ✓ Score: 0.892 (threshold 0.85) ✅ PASSED', 'success');
+                    addLog('   IFEval: 541 tasks...', 'info');
+                    await sleep(400);
+                    addLog('   ✓ Score: 0.913 (threshold 0.90) ✅ PASSED', 'success');
+                    addLog('   Regression: 42 custom cases...', 'info');
+                    await sleep(200);
+                    addLog('   ✓ Score: 1.000 ✅ PASSED', 'success');
+                    addLog('   📈 Average: 0.913 | All benchmarks PASSED', 'success');
+                }
+                
+                if (stage === 'review' || stage === 'full') {
+                    addLog('\n👁️ REVIEWER AGENT: Analyzing proposal...', 'info');
+                    await sleep(200);
+                    addLog('   Tensor changes: 3 (attention q_proj rank-1)', 'info');
+                    addLog('   Regression check: all benchmarks ≥ threshold', 'info');
+                    addLog('   Stability check: low change count (3), no failed benchmarks', 'info');
+                    addLog('   Safety check: no embedding/ln changes', 'info');
+                    addLog('   ✓ Overall Risk: LOW', 'success');
+                    addLog('   ✓ Recommendation: APPROVE', 'success');
+                }
+                
+                if (stage === 'gate' || stage === 'full') {
+                    addLog('\n🚪 HUMAN GATE: Creating approval request...', 'info');
+                    await sleep(200);
+                    addLog('   Proposal ID: ws-20261118-001', 'info');
+                    addLog('   Tensor diff summary generated (3 changes)', 'info');
+                    addLog('   Eval comparison table generated', 'info');
+                    addLog('   Reviewer report attached', 'info');
+                    addLog('   ✓ Request created, awaiting human decision', 'warning');
+                    addLog('   Summary:\n' + generateMockSummary(), 'info');
+                }
+                
+                if (stage === 'full') {
+                    addLog('\n🎉 FULL PIPELINE SIMULATION COMPLETE', 'success');
+                    addLog('   Next step: Human approves → checkpoint.save() → production rollout', 'info');
+                }
+            } catch (e) {
+                addLog(`Error: ${e.message}`, 'error');
+            } finally {
+                buttons.forEach(b => b.disabled = false);
+            }
+        }
+
+        function generateMockSummary() {
+            return `=== WEIGHT-SPACE EDIT PROPOSAL ===
+Proposal ID: ws-20261118-001
+Status: PENDING
+Created: 2026-11-18T11:45:00Z
+Expires: 2026-11-19T11:45:00Z
+
+--- TENSOR CHANGES (3) ---
+  model.layers.15.attn.q_proj.weight [4096, 4096] CHANGED (a3f2... -> 7b9c...)
+  model.layers.15.attn.k_proj.weight [4096, 4096] CHANGED (b1e4... -> 9d2a...)
+  model.layers.15.attn.v_proj.weight [4096, 4096] CHANGED (c5f8... -> 1e3b...)
+
+--- EVAL COMPARISON ---
+  MATH-500: 0.847 (Δ+0.012) ✅
+  GSM8K: 0.892 (Δ+0.008) ✅
+  IFEval: 0.913 (Δ+0.005) ✅
+  Regression: 1.000 (Δ+0.000) ✅
+
+--- REVIEWER REPORT ---
+Overall Risk: LOW
+Recommendation: APPROVE
+
+Findings:
+  - [LOW] regression: MATH-500 improved by 0.012
+  - [LOW] regression: GSM8K improved by 0.008
+  - [LOW] regression: IFEval improved by 0.005
+
+>>> DECISION REQUIRED: approve / reject <<<`;
+        }
+    </script>
 </body>
 </html>
