@@ -2,12 +2,12 @@
   "hosting": [
     {
       "target": "hafize-weight-space-demo",
-      "public": ".",
+      "public": "site-a",
       "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"]
     },
     {
       "target": "weight-space06",
-      "public": ".",
+      "public": "site-b",
       "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"]
     }
   ]
