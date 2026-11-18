@@ -24,6 +24,7 @@ const audit = [];
 function log(action, data) {
   audit.push({action, time:new Date().toISOString(), ...data});
   el('export').disabled = false;
+  saveSession();
 }
 function invalidate() { candidate = null; el('apply').disabled = true; }
 el('experiment').addEventListener('input', invalidate);
@@ -44,12 +45,14 @@ el('experiment').onsubmit = event => {
 el('apply').onclick = () => {
   if (!candidate) return;
   history.push(current); current = candidate; invalidate(); el('undo').disabled=false;
-  log('accept',{weights:current}); el('result').textContent += '\nAday bu oturumda etkin.';
+  el('result').textContent += '\nAday bu oturumda etkin.';
+  log('accept',{weights:current});
 };
 el('undo').onclick = () => {
   if (!history.length) return;
   current = history.pop(); invalidate(); el('undo').disabled = !history.length;
-  log('rollback',{weights:current}); el('result').textContent = 'Önceki ağırlıklar geri yüklendi. Hata: '+loss(current,holdout).toPrecision(6);
+  el('result').textContent = 'Önceki ağırlıklar geri yüklendi. Hata: '+loss(current,holdout).toPrecision(6);
+  log('rollback',{weights:current});
 };
 el('export').onclick = () => {
   const url = URL.createObjectURL(new Blob([JSON.stringify({model:'linear-2d-v1',train,holdout,audit},null,2)],{type:'application/json'}));
@@ -91,3 +94,43 @@ el('predict').onsubmit = event => {
     ? 'Tahmin: '+actual.toPrecision(6)+' · Hedef: '+expected.toPrecision(6)+' · Mutlak hata: '+Math.abs(actual-expected).toPrecision(6)
     : 'Daha küçük sayılarla tekrar dene.';
 };
+
+const sessionKey = 'weight-space06.lab.v1';
+function saveSession() {
+  try {
+    const snapshot = JSON.stringify({
+      current, candidate, history, audit, rate: el('rate').value,
+      epochs: el('epochs').value, result: el('result').textContent
+    });
+    sessionStorage.setItem(sessionKey,snapshot);
+    el('session-info').textContent = 'Bu sekmede kayıtlı.';
+  } catch {
+    el('session-info').textContent = 'Oturum kaydedilemedi. Son deney kaydını JSON olarak indirebilirsin.';
+  }
+}
+function restoreSession() {
+  try {
+    const saved = sessionStorage.getItem(sessionKey);
+    if (!saved) return;
+    const state = JSON.parse(saved);
+    const vector = w => Array.isArray(w) && w.length===3 && w.every(Number.isFinite);
+    if (!vector(state.current) || !(state.candidate===null || vector(state.candidate)) ||
+        !Array.isArray(state.history) || !state.history.every(vector) || !Array.isArray(state.audit) ||
+        !state.audit.every(e=>e && ['evaluate','accept','rollback'].includes(e.action))) throw Error();
+    current=state.current;
+    candidate=state.candidate;
+    for (const entry of state.history) history.push(entry);
+    for (const entry of state.audit) audit.push(entry);
+    el('rate').value=state.rate;
+    el('epochs').value=state.epochs;
+    el('result').textContent=state.result;
+    el('export').disabled=!audit.length;
+    el('apply').disabled=!candidate;
+    el('undo').disabled=!history.length;
+    el('session-info').textContent='Bu sekmedeki deney geri yüklendi.';
+  } catch {
+    el('session-info').textContent='Önceki oturum yüklenemedi.';
+  }
+}
+el('experiment').addEventListener('input',saveSession);
+restoreSession();
