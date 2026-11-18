@@ -1,0 +1,7 @@
+{
+  "hosting": {
+    "site": "hafize-weight-space-demo",
+    "public": ".",
+    "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"]
+  }
+}
