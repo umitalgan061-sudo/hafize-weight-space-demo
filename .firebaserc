@@ -1,9 +1,9 @@
 {
   "projects": {
-    "default": "hafize-23465"
+    "default": "projelerim-8fecd"
   },
   "targets": {
-    "hafize-23465": {
+    "projelerim-8fecd": {
       "hosting": {
         "hafize-weight-space-demo": ["hafize-weight-space-demo"],
         "weight-space06": ["weight-space06"]
