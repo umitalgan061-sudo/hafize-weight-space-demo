@@ -45,12 +45,14 @@ el('experiment').onsubmit = event => {
 el('apply').onclick = () => {
   if (!candidate) return;
   history.push(current); current = candidate; invalidate(); el('undo').disabled=false;
-  log('accept',{weights:current}); el('result').textContent += '\nAday bu oturumda etkin.';
+  el('result').textContent += '\nAday bu oturumda etkin.';
+  log('accept',{weights:current});
 };
 el('undo').onclick = () => {
   if (!history.length) return;
   current = history.pop(); invalidate(); el('undo').disabled = !history.length;
-  log('rollback',{weights:current}); el('result').textContent = 'Önceki ağırlıklar geri yüklendi. Hata: '+loss(current,holdout).toPrecision(6);
+  el('result').textContent = 'Önceki ağırlıklar geri yüklendi. Hata: '+loss(current,holdout).toPrecision(6);
+  log('rollback',{weights:current});
 };
 el('export').onclick = () => {
   const url = URL.createObjectURL(new Blob([JSON.stringify({model:'linear-2d-v1',train,holdout,audit},null,2)],{type:'application/json'}));
