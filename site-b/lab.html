@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ağırlık laboratuvarı · Hafize</title><link rel="stylesheet" href="lab.css"><script type="module" src="lab.js"></script></head>
+<body><main><a href="./">Ana sayfa</a><h1>Ağırlık laboratuvarı</h1><p>İki girdiden bir sayı tahmin eden küçük bir doğrusal modeli cihazında eğit. Başlangıç ve aday ağırlıklar aynı ayrılmış doğrulama örneklerinde ölçülür.</p>
+<form id="experiment"><label>Öğrenme hızı <input id="rate" type="number" min="0.001" max="2" step="0.001" value="0.1" required></label><label>Eğitim adımı <input id="epochs" type="number" min="1" max="200" step="1" value="20" required></label><button>Adayı eğit ve ölç</button></form>
+<h2>Doğrulama sonucu</h2><pre id="result" aria-live="polite">Henüz deney çalıştırılmadı.</pre><button id="apply" disabled>Adayı kabul et</button><button id="undo" disabled>Geri al</button><button id="export" disabled>Deney kaydını indir</button>
+<p>Örnek hedef fonksiyonu y = 2x₁ − 3x₂ + 1. Hata ölçütü ortalama karesel hatadır. Deney bu sayfadaki küçük modelle sınırlıdır. Sayfa kapandığında oturum sıfırlanır.</p></main></body></html>
