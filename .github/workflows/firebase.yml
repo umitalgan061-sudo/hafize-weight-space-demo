@@ -21,6 +21,9 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: Deploy to Firebase
-        run: firebase deploy --project=hafize-23465 --only=hosting:hafize-weight-space-demo --token=${{ secrets.FIREBASE_TOKEN }} --non-interactive --debug
+        run: |
+          npx firebase-tools deploy --project=hafize-23465 --only=hosting:hafize-weight-space-demo --token=${{ secrets.FIREBASE_TOKEN }} --non-interactive --debug 2>&1 | tee /tmp/deploy.log
+          echo "---DEPLOY LOG---"
+          tail -50 /tmp/deploy.log
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
