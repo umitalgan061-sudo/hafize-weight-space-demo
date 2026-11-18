@@ -1,5 +1,13 @@
 {
   "projects": {
     "default": "hafize-23465"
+  },
+  "targets": {
+    "hafize-23465": {
+      "hosting": {
+        "hafize-weight-space-demo": ["hafize-weight-space-demo"],
+        "weight-space06": ["weight-space06"]
+      }
+    }
   }
 }

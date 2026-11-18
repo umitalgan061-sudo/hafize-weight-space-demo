@@ -1,7 +1,14 @@
 {
-  "hosting": {
-    "site": "hafize-weight-space-demo",
-    "public": ".",
-    "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"]
-  }
+  "hosting": [
+    {
+      "target": "hafize-weight-space-demo",
+      "public": ".",
+      "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"]
+    },
+    {
+      "target": "weight-space06",
+      "public": ".",
+      "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"]
+    }
+  ]
 }
