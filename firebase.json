@@ -3,12 +3,14 @@
     {
       "target": "hafize-weight-space-demo",
       "public": "site-a",
-      "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"]
+      "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"],
+      "rewrites": [{"source": "**", "destination": "/index.html"}]
     },
     {
       "target": "weight-space06",
       "public": "site-b",
-      "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"]
+      "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"],
+      "rewrites": [{"source": "**", "destination": "/index.html"}]
     }
   ]
 }
