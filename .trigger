@@ -1,0 +1,1 @@
+trigger workflow after FIREBASE_TOKEN secret added
