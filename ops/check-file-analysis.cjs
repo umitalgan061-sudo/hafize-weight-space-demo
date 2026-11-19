@@ -5,6 +5,16 @@ const { chromium } = require('playwright-core');
   try {
     const page = await browser.newPage({viewport:{width:390,height:844},serviceWorkers:'block'});
     const origin='https://hafize-ua.web.app';
+    await page.goto(origin+'/');
+    await page.locator('#messageInput').evaluate(box=>{box.value='Deney kaydını doğrula';box.dispatchEvent(new Event('input',{bubbles:true}));});
+    const suggestion=page.locator('#local-tool-suggestions a').first();
+    assert.equal(await suggestion.getAttribute('href'),'/task-plan.html#experiment-file');
+    await page.goto('https://weight-space06.web.app/lab.html');
+    await page.locator('#experiment button').click();
+    const points=page.locator('#learning-curve tr');
+    assert.equal(await points.count(),5);
+    assert.equal(await points.last().locator('td').first().textContent(),'20');
+    assert.ok(Number(await points.last().locator('td').last().textContent()) < Number(await points.first().locator('td').last().textContent()));
     await page.goto(origin+'/file-analysis.html');
     await page.locator('#upload').setInputFiles({name:'ilceler.csv',mimeType:'text/csv',buffer:Buffer.from('İlçe;Bedel\nÇankaya;10,5\nÇankaya;4,5\nSincan;boş')});
     await page.waitForFunction(()=>document.querySelector('#source').value.includes('Çankaya'));
