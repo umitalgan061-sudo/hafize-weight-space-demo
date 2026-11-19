@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/workflows/hafize-tools.yml', 'ops/publish-hafize-tools.cjs']
+    paths: ['.github/workflows/hafize-tools.yml', 'ops/publish-hafize-tools.cjs', 'ops/check-file-analysis.cjs']
 permissions:
   contents: read
 concurrency:
