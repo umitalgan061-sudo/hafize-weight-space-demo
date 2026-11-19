@@ -36,7 +36,10 @@ const { chromium } = require('playwright-core');
     await page.locator('#messageInput').evaluate(box=>{box.value='Deney kaydını doğrula';box.dispatchEvent(new Event('input',{bubbles:true}));});
     const suggestion=page.locator('#local-tool-suggestions a').first();
     assert.equal(await suggestion.getAttribute('href'),'/task-plan.html#experiment-file');
-    // A synthetic conversation on the deployed home page keeps this test out of the user's history.
+    // Verify the deployed module on a fixture with the same message/composer markup.
+    // The production sign-in screen stays intact; no account or real conversation is needed.
+    await page.route('**/quote-browser-test',route=>route.fulfill({contentType:'text/html',body:'<section id="messages"></section><form id="composer"><textarea id="messageInput"></textarea></form><script type="module" src="/typed-build/analysis-draft.js"></script>'}));
+    await page.goto(origin+'/quote-browser-test');
     await page.evaluate(()=>{
       const message=document.createElement('article');message.className='message assistant';
       const content=document.createElement('div');content.className='content';content.textContent='P5 aydınlatması';
