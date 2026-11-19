@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: umitalgan061-sudo/hafize
-          ref: de58541ad13d3dffe970eb0ba22244e32c7bd413
+          ref: 8681dbd344f9d887a4ce27d8623dd519247f1685
           path: hafize
           persist-credentials: false
       - uses: actions/setup-node@v4
