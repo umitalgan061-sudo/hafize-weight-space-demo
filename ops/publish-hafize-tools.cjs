@@ -48,12 +48,16 @@ async function publish() {
   if (original.split(anchor).length !== 2) throw Error('Unexpected navigation layout');
   let html = original;
   const additions = [];
-  for (const [url,title] of [['/task-plan.html','Görev planını denetle'],['/studio.html','Ses ve montaj stüdyosu'],['https://weight-space06.web.app/lab.html','Ağırlık laboratuvarı']]) {
+  for (const [url,title] of [['/file-analysis.html','CSV ve kod değişikliklerini incele'],['/task-plan.html','Görev planını denetle'],['/studio.html','Ses ve montaj stüdyosu'],['https://weight-space06.web.app/lab.html','Ağırlık laboratuvarı']]) {
     if (!html.includes('href="'+url+'"')) additions.push('<a class="soft-btn" href="'+url+'">'+title+'</a>');
   }
   html = html.replace(anchor, anchor+'\n'+additions.join('\n'));
+  if (!html.includes('src="/typed-build/analysis-draft.js"')) {
+    if (!html.includes('</body>')) throw Error('Missing page body');
+    html = html.replace('</body>', '<script type="module" src="/typed-build/analysis-draft.js"></script></body>');
+  }
   const overlay = new Map([['/index.html',Buffer.from(html)]]);
-  for (const path of ['task-plan.html','studio.html','studio.css','typed-build/task-plan.js','typed-build/studio.js']) {
+  for (const path of ['file-analysis.html','typed-build/file-analysis.js','typed-build/analysis-draft.js','task-plan.html','studio.html','studio.css','typed-build/task-plan.js','typed-build/studio.js']) {
     overlay.set('/'+path,fs.readFileSync('assets/'+path));
   }
   const uploads = new Map();

@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: umitalgan061-sudo/hafize
-          ref: 7c76adab72c620b5ae8de6e7b1c42ced1b073d7f
+          ref: d18aa1875e61c5a084219c4c2cebe4ae36d8a3b8
           path: hafize
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -30,8 +30,8 @@ jobs:
           set -eu
           cd hafize
           mkdir -p ../assets/typed-build
-          npm exec --yes --package=esbuild@0.25.12 -- esbuild public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build
-          cp public/task-plan.html public/studio.html public/studio.css ../assets/
+          npm exec --yes --package=esbuild@0.25.12 -- esbuild public/typed/file-analysis.ts public/typed/analysis-draft.ts public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build
+          cp public/file-analysis.html public/task-plan.html public/studio.html public/studio.css ../assets/
       - run: npm install --global firebase-tools@14
       - name: Publish and verify live site
         env:
@@ -48,3 +48,7 @@ jobs:
           fi
           export NODE_PATH="$(npm root --global)"
           node ops/publish-hafize-tools.cjs
+      - name: Exercise the live analysis tools in Chrome
+        run: |
+          npm install --prefix "$RUNNER_TEMP/hafize-browser" --no-audit --no-fund playwright-core@1.55.0
+          NODE_PATH="$RUNNER_TEMP/hafize-browser/node_modules" node ops/check-file-analysis.cjs
