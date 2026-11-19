@@ -17,6 +17,12 @@ const { chromium } = require('playwright-core');
     },text);
     assert.match(await send('(5+3)*2'),/yerel hesap sonucu.*≈ 16/);
     assert.equal(await send('Bugün hava nasıl?'),'Bugün hava nasıl?');
+    const revision=await page.evaluate(async()=>{
+      const messages=[{role:'user',content:'Belediyeye otopark ışıkları için mail yaz.'},{role:'assistant',content:'Sayın yetkili, otopark aydınlatması hakkında yazıyorum.'},{role:'user',content:'Daha kısa yaz'}];
+      return (await (await fetch('/api/chat',{method:'POST',body:JSON.stringify({messages})})).json()).messages;
+    });
+    assert.match(revision.at(-1).content,/hedef kitleyi/);
+    assert.equal(revision[0].content,'Belediyeye otopark ışıkları için mail yaz.');
     const followup=async (history,question)=>page.evaluate(async ({history,question})=>{
       const messages=history.flatMap(text=>[{role:'user',content:text},{role:'assistant',content:'Önceki yanıt'}]);
       messages.push({role:'user',content:question});
@@ -30,6 +36,17 @@ const { chromium } = require('playwright-core');
     await page.locator('#messageInput').evaluate(box=>{box.value='Deney kaydını doğrula';box.dispatchEvent(new Event('input',{bubbles:true}));});
     const suggestion=page.locator('#local-tool-suggestions a').first();
     assert.equal(await suggestion.getAttribute('href'),'/task-plan.html#experiment-file');
+    // A synthetic conversation on the deployed home page keeps this test out of the user's history.
+    await page.evaluate(()=>{
+      const message=document.createElement('article');message.className='message assistant';
+      const content=document.createElement('div');content.className='content';content.textContent='P5 aydınlatması';
+      message.append(content);document.querySelector('#messages').append(message);
+      const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(content);
+      selection.removeAllRanges();selection.addRange(range);
+      document.dispatchEvent(new Event('selectionchange'));
+    });
+    await page.locator('#quote-chat-selection').click();
+    assert.match(await page.locator('#messageInput').inputValue(),/> P5 aydınlatması/);
     await page.goto('https://weight-space06.web.app/lab.html');
     await page.locator('#experiment button').click();
     const points=page.locator('#learning-curve tr');
