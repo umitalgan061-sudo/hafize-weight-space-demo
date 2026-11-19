@@ -40,6 +40,15 @@ el('experiment').onsubmit = event => {
   if (improved) candidate = weights;
   el('apply').disabled = !improved;
   el('result').textContent = ['Önceki hata: '+before.toPrecision(6),'Aday hatası: '+after.toPrecision(6),'Aday ağırlıkları: '+weights.map(x=>x.toPrecision(5)).join(', '), improved?'Hata azaldı. Aday kabul edilebilir.':'Hata azalmadı. Aday uygulanamaz.'].join('\n');
+  const checkpoints=[...new Set([0,Math.round(epochs/4),Math.round(epochs/2),Math.round(3*epochs/4),epochs])];
+  const curve=el('learning-curve');
+  curve.replaceChildren();
+  for(const step of checkpoints) {
+    const point=step===epochs ? weights : fit(current,rate,step);
+    const tr=curve.insertRow();
+    for(const value of [String(step),loss(point,train).toPrecision(5),loss(point,holdout).toPrecision(5)]) tr.insertCell().textContent=value;
+  }
+  el('curve-section').hidden=false;
   log('evaluate',{rate,epochs,initial:[...current],weights,before,after,improved,trainingRows:train.length,validationRows:holdout.length});
 };
 el('apply').onclick = () => {
