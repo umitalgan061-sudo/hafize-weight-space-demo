@@ -17,6 +17,15 @@ const { chromium } = require('playwright-core');
     },text);
     assert.match(await send('(5+3)*2'),/yerel hesap sonucu.*≈ 16/);
     assert.equal(await send('Bugün hava nasıl?'),'Bugün hava nasıl?');
+    const followup=async (history,question)=>page.evaluate(async ({history,question})=>{
+      const messages=history.flatMap(text=>[{role:'user',content:text},{role:'assistant',content:'Önceki yanıt'}]);
+      messages.push({role:'user',content:question});
+      const response=await fetch('/api/chat',{method:'POST',body:JSON.stringify({messages})});
+      return (await response.json()).messages.at(-1).content;
+    },{history,question});
+    assert.match(await followup(["250 TL’nin %18’i kaçtır?"],"Peki ya %20’si?"),/250 × 20 \/ 100 ≈ 50/);
+    assert.match(await followup(["250 TL’nin %18’i kaçtır?"],"Sonucun %20’si?"),/45 × 20 \/ 100 ≈ 9/);
+    assert.equal(await followup(["Ankara hakkında konuşalım"],"Peki %10?"),"Peki %10?");
     await page.goto(origin+'/');
     await page.locator('#messageInput').evaluate(box=>{box.value='Deney kaydını doğrula';box.dispatchEvent(new Event('input',{bubbles:true}));});
     const suggestion=page.locator('#local-tool-suggestions a').first();
