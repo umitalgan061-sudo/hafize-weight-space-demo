@@ -6,6 +6,18 @@ const { chromium } = require('playwright-core');
     const page = await browser.newPage({viewport:{width:390,height:844},serviceWorkers:'block'});
     const origin='https://hafize-ua.web.app';
     await page.goto(origin+'/');
+    await page.locator('#messageInput').evaluate(box=>{box.value="250 TL’nin %18’i kaçtır?";box.dispatchEvent(new Event('input',{bubbles:true}));});
+    assert.match(await page.locator('#local-tool-suggestions output').textContent(),/≈ 45$/);
+    // Exercise the shipped chat adapter without submitting a test conversation to the user's account.
+    await page.route('**/calculation-transport-test',route=>route.fulfill({contentType:'text/html',body:'<script>window.fetch=async(_,init)=>new Response(init.body)</script><script type="module" src="/typed-build/analysis-draft.js"></script>'}));
+    await page.goto(origin+'/calculation-transport-test');
+    const send = text => page.evaluate(async value => {
+      const response = await fetch('/api/chat',{method:'POST',body:JSON.stringify({messages:[{role:'user',content:value}]})});
+      return (await response.json()).messages[0].content;
+    },text);
+    assert.match(await send('(5+3)*2'),/yerel hesap sonucu.*≈ 16/);
+    assert.equal(await send('Bugün hava nasıl?'),'Bugün hava nasıl?');
+    await page.goto(origin+'/');
     await page.locator('#messageInput').evaluate(box=>{box.value='Deney kaydını doğrula';box.dispatchEvent(new Event('input',{bubbles:true}));});
     const suggestion=page.locator('#local-tool-suggestions a').first();
     assert.equal(await suggestion.getAttribute('href'),'/task-plan.html#experiment-file');
