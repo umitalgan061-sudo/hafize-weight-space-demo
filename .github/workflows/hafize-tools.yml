@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/workflows/hafize-tools.yml', 'ops/publish-hafize-tools.cjs', 'ops/check-file-analysis.cjs']
+    paths: ['.github/workflows/hafize-tools.yml', 'ops/publish-hafize-tools.cjs', 'ops/check-file-analysis.cjs', 'ops/check-camera-voice.cjs']
 permissions:
   contents: read
 concurrency:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: umitalgan061-sudo/hafize
-          ref: 24d244685d7e383cac075e87288776a98edca46d
+          ref: 7d13759ca33f186654ed327bc9208be8e1cdbcc7
           path: hafize
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -30,8 +30,8 @@ jobs:
           set -eu
           cd hafize
           mkdir -p ../assets/typed-build
-          npm exec --yes --package=esbuild@0.25.12 -- esbuild public/typed/file-analysis.ts public/typed/analysis-draft.ts public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build
-          cp public/file-analysis.html public/task-plan.html public/studio.html public/studio.css ../assets/
+          npm exec --yes --package=esbuild@0.25.12 -- esbuild public/typed/live-screen.ts public/typed/voice-mode.ts public/typed/file-analysis.ts public/typed/analysis-draft.ts public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build
+          cp public/voice-mode.css public/file-analysis.html public/task-plan.html public/studio.html public/studio.css ../assets/
       - run: npm install --global firebase-tools@14
       - name: Publish and verify live site
         env:
@@ -52,3 +52,4 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/hafize-browser" --no-audit --no-fund playwright-core@1.55.0
           NODE_PATH="$RUNNER_TEMP/hafize-browser/node_modules" node ops/check-file-analysis.cjs
+          NODE_PATH="$RUNNER_TEMP/hafize-browser/node_modules" node ops/check-camera-voice.cjs
