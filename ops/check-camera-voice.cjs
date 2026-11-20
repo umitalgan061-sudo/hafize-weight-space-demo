@@ -90,6 +90,16 @@ const assert=require('node:assert/strict');
   await page.click('#liveCameraBtn');
   await page.getByRole('button', {name:'Sesli sohbete geç'}).waitFor();
   assert.equal(await page.locator('.voice-mode').isVisible(), false);
+  const result = await page.evaluate(async () => {
+    const voice = await import('/typed-build/voice-output.js');
+    const line = 'Dr. Ece bugün %15,5 dedi. Sonra ' + 'konuşmaya devam etti, '.repeat(8) + 'sen nasılsın?';
+    const chunks = voice.splitSpeechText(line, 80);
+    const voices = ['Yelda', 'Yelda (Enhanced)'].map(name => ({lang:'tr-TR', name, voiceURI:name}));
+    return [chunks.join(' '), voice.normalizeSpeechText(line), chunks[0], voice.pickTurkishVoice(voices).name, voice.pickTurkishVoice(voices,'Yelda').name];
+  });
+  assert.equal(result[0], result[1]);
+  assert.equal(result[2], 'Doktor Ece bugün yüzde 15,5 dedi.');
+  assert.deepEqual(result.slice(3), ['Yelda (Enhanced)', 'Yelda']);
   console.log('Published camera and voice modules passed the synthetic two-camera, transcript, spoken-reply event, fallback, flip and cleanup checks.');
  }finally{await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1});

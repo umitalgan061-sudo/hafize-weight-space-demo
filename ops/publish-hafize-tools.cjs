@@ -57,7 +57,7 @@ async function publish() {
     html = html.replace('</body>', '<script type="module" src="/typed-build/analysis-draft.js"></script></body>');
   }
   const overlay = new Map([['/index.html',Buffer.from(html)]]);
-  for (const path of ['typed-build/live-screen.js','typed-build/voice-mode.js','voice-mode.css','file-analysis.html','typed-build/file-analysis.js','typed-build/analysis-draft.js','task-plan.html','studio.html','studio.css','typed-build/task-plan.js','typed-build/studio.js']) {
+  for (const path of ['typed-build/voice-output.js','typed-build/live-screen.js','typed-build/voice-mode.js','voice-mode.css','file-analysis.html','typed-build/file-analysis.js','typed-build/analysis-draft.js','task-plan.html','studio.html','studio.css','typed-build/task-plan.js','typed-build/studio.js']) {
     overlay.set('/'+path,fs.readFileSync('assets/'+path));
   }
   const uploads = new Map();
