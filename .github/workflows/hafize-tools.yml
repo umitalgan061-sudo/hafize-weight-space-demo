@@ -25,13 +25,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: umitalgan061-sudo/hafize
-          ref: 14acf305405acf2dd828f2662ab6ea58317f0a94
+          ref: 5c98ce0eeadaefef0062a76e2fdba2ed93f21338
           path: camera-source
           sparse-checkout: |
             public/typed/live-screen.ts
             public/typed/voice-mode.ts
             public/typed/voice-output.ts
             public/typed/voice-library.ts
+            public/typed/supertonic-worker.js
+            public/typed/supertonic-pack.ts
+            public/typed/voice-settings.ts
           sparse-checkout-cone-mode: false
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -40,12 +43,18 @@ jobs:
       - name: Build standalone frontend tools
         run: |
           set -eu
-          cp camera-source/public/typed/{live-screen,voice-mode}.ts hafize/public/typed/
+          cp camera-source/public/typed/* hafize/public/typed/
+          npm install --prefix camera-source --no-audit --no-fund esbuild@0.25.12 onnxruntime-web@1.20.1
           cd hafize
           mkdir -p ../assets/typed-build
-          npm exec --yes --package=esbuild@0.25.12 -- esbuild ../camera-source/public/typed/voice-output.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=../assets/typed-build/voice-output.js
+          ../camera-source/node_modules/.bin/esbuild ../camera-source/public/typed/{supertonic-worker.js,voice-output.ts,voice-settings.ts} --bundle --format=esm --target=es2022 --outdir=../assets/typed-build
+          ../camera-source/node_modules/.bin/esbuild ../camera-source/public/typed/voice-library.ts --bundle --format=esm --outfile=../voice-test-lib.js
           npm exec --yes --package=esbuild@0.25.12 -- esbuild public/typed/live-screen.ts public/typed/voice-mode.ts public/typed/file-analysis.ts public/typed/analysis-draft.ts public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build
           cp public/voice-mode.css public/file-analysis.html public/task-plan.html public/studio.html public/studio.css ../assets/
+      - name: Synthesize Turkish with two downloaded speakers
+        run: |
+          npm install --prefix "$RUNNER_TEMP/speech-check" playwright-core@1.55.0
+          NODE_PATH="$RUNNER_TEMP/speech-check/node_modules" node ops/check-supertonic.cjs
       - run: npm install --global firebase-tools@14
       - name: Publish and verify live site
         env:
