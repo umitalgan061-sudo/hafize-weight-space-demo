@@ -25,9 +25,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: umitalgan061-sudo/hafize
-          ref: 64ac7f6d59696015cda4a5b0eee690ca2c6e245c
+          ref: 132d6285948e3b632fe2804c339d17a61b80e5cb
           path: camera-source
-          sparse-checkout: public/typed/live-screen.ts
+          sparse-checkout: |
+            public/typed/live-screen.ts
+            public/typed/voice-mode.ts
           sparse-checkout-cone-mode: false
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -36,7 +38,7 @@ jobs:
       - name: Build standalone frontend tools
         run: |
           set -eu
-          cp camera-source/public/typed/live-screen.ts hafize/public/typed/live-screen.ts
+          cp camera-source/public/typed/{live-screen,voice-mode}.ts hafize/public/typed/
           cd hafize
           mkdir -p ../assets/typed-build
           npm exec --yes --package=esbuild@0.25.12 -- esbuild public/typed/live-screen.ts public/typed/voice-mode.ts public/typed/file-analysis.ts public/typed/analysis-draft.ts public/typed/task-plan.ts public/typed/studio.ts --bundle --format=esm --platform=browser --target=es2022 --outdir=../assets/typed-build

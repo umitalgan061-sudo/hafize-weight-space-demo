@@ -66,6 +66,25 @@ const assert=require('node:assert/strict');
   await page.click('#liveCameraBtn');
   await page.waitForSelector('.voice-mode .live-screen-chip video');
   await page.waitForFunction(() => window.recognitions.length > 0);
+  await page.evaluate(() => {
+    const recognized = window.recognitions.at(-1);
+    window.submittedGreetings = 0;
+    document.querySelector('#composer').addEventListener('submit', () => window.submittedGreetings++);
+    const result = Object.assign([{transcript:'Naber?'}], {isFinal:true});
+    recognized.onresult({results:[result]});
+    recognized.onend();
+  });
+  assert.deepEqual(await page.evaluate(() => [window.speech, window.submittedGreetings]),
+    [['İyiyim, sen nasılsın?'], 0]);
+  await page.evaluate(() => {
+    const source = 'voice-output';
+    const state = speaking => document.dispatchEvent(new CustomEvent('hafize:voice-output-state', {
+      detail: {source, speaking, origin: 'voice-mode'}
+    }));
+    state(true);
+    state(false);
+  });
+  await page.waitForFunction(() => window.recognitions.length > 1);
   await autoTalk.uncheck();
   await page.click('.vm-close');
   await page.click('#liveCameraBtn');
