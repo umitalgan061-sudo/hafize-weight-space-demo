@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
     page.on('console', m => { if (['warning','error'].includes(m.type())) console.error(m.text().slice(0,400)); });
     page.on('pageerror', e => console.error(e.message));
     await page.route('**/mobile-voice-test', route => route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="tr"><div class="settings-workspace"></div><button data-voice-toggle="output"></button><div id="toast"></div><script type="module" src="/typed-build/voice-output.js"></script><script type="module" src="/typed-build/voice-settings.js"></script></html>`}));
-    for (const module of ['voice-output','voice-settings','supertonic-worker']) {
+    if (!process.env.LIVE_ONLY) for (const module of ['voice-output','voice-settings','supertonic-worker']) {
       await page.route('**/typed-build/'+module+'.js', route => route.fulfill({path:'assets/typed-build/'+module+'.js',contentType:'text/javascript'}));
     }
     await page.addInitScript(() => {
